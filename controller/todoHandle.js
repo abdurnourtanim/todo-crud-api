@@ -26,6 +26,42 @@ router.get("/", async (req, res) => {
     });
 });
 
+// get active todo
+router.get("/active", async (req, res) => {
+  const todo = new Todo();
+  await todo
+    .findActive()
+    .then((response) => {
+      res.status(200).json({ todo: response });
+    })
+    .catch((error) => {
+      res.status(404).json(error);
+    });
+});
+
+// get js title todo
+router.get("/js", async (req, res) => {
+  await Todo.findByJS()
+    .then((response) => {
+      res.status(200).json({ todo: response });
+    })
+    .catch((error) => {
+      res.status(404).json(error);
+    });
+});
+
+// get todo by language
+router.get("/language", async (req, res) => {
+  await Todo.find()
+    .byLanguage("react")
+    .then((response) => {
+      res.status(200).json({ todo: response });
+    })
+    .catch((error) => {
+      res.status(404).json(error);
+    });
+});
+
 // get todo  by id
 router.get("/:id", async (req, res) => {
   await Todo.findById(req.params.id)
