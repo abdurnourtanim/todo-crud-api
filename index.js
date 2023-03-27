@@ -13,7 +13,9 @@ app.use(express.json());
 // database connection
 connect();
 
+// todo route
 app.use("/todo", todoHandle);
+//user route
 app.use("/user", userHandle);
 
 app.listen(4000, () => console.log("Server runing on PORT:4000"));
