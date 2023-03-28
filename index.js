@@ -5,9 +5,7 @@ const userHandle = require("./controller/userHandle");
 const dotenv = require("dotenv");
 
 const app = express();
-
 dotenv.config();
-
 app.use(express.json());
 
 // database connection
