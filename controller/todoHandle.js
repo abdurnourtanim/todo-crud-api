@@ -3,23 +3,27 @@ const mongoose = require("mongoose");
 const chekcLogin = require("../middleware/checkLogin");
 const router = expreess.Router();
 const todoSchema = require("../schema/todoSchema");
+const userSchema = require("../schema/userSchema");
 const Todo = new mongoose.model("Todo", todoSchema);
+const User = new mongoose.model("User", userSchema);
 
 // get all todo
 router.get("/", chekcLogin, async (req, res) => {
   await Todo.find(
-    req.body,
+    {},
+
     {
       // data filtering
       _id: 0,
       __v: 0,
       date: 0,
-    },
+    }
     // data limitation
-    { limit: 2 }
+    // { limit: 20 }
   )
+    .populate("user", "name username -_id") // - sign for not show _id
     .then((response) => {
-      res.status(200).json({ todos: response });
+      res.status(200).json(response);
     })
     .catch((error) => {
       console.log(error);
@@ -76,17 +80,38 @@ router.get("/:id", async (req, res) => {
 });
 
 // post todo
-router.post("/", async (req, res) => {
-  const newTodo = new Todo(req.body);
-  await newTodo
-    .save()
-    .then(() => {
-      res.status(200).json({ message: "Todo was inserted successfull" });
-    })
-    .catch((error) => {
-      console.log(error);
-      res.status(406).json({ error: "There was server side problem" });
-    });
+router.post("/", chekcLogin, async (req, res) => {
+  const newTodo = new Todo({
+    ...req.body,
+    user: req.userId,
+  });
+
+  try {
+    const todo = await newTodo;
+
+    todo
+      .save()
+      .then(async () => {
+        await User.updateOne(
+          {
+            _id: req.userId,
+          },
+          {
+            $push: {
+              todos: todo._id,
+            },
+          }
+        );
+
+        res.status(200).json({ message: "Todo was inserted successfull" });
+      })
+      .catch((error) => {
+        console.log(error);
+        res.status(406).json({ error: "There was server side problem" });
+      });
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 // post multiple todo

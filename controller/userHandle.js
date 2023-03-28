@@ -52,21 +52,40 @@ router.post("/login", async (req, res) => {
         );
         res.status(200).json({
           access_token: token,
-          message: "Login successfull! ",
+          message: "Login successfull!",
         });
       } else {
         res.status(401).json({
-          error: "Authentication failed! 1",
+          error: "Authentication failed!",
         });
       }
     } else {
       res.status(401).json({
-        error: "Authentication failed! 2 ",
+        error: "Authentication failed!",
       });
     }
   } catch {
     res.status(401).json({
-      error: "Authentication failed! 3",
+      error: "Authentication failed!",
+    });
+  }
+});
+
+// get all users
+router.get("/all-users", async (req, res) => {
+  try {
+    const users = await User.find({})
+      .populate("todos")
+      .then((response) => {
+        res.status(200).json(response);
+      })
+      .catch((error) => {
+        res.status(500).json(error);
+      });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "There was a server side error",
     });
   }
 });
